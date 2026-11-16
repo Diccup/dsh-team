@@ -296,7 +296,7 @@ export const CONFIG_DEFAULTS = {
 	scoreWeighted: false,
 	scoreHalfLifeDays: 14,
 	scoreMaxKeys: 1500,
-	// 2026-10-31 验收门（采纳隔壁 c197654c 建议，实现由实现方定）：finish → delivered 待验收，
+	// 2026-10-31 验收门（采纳某次实测 建议，实现由实现方定）：finish → delivered 待验收，
 	// 队长 accept 才 done 并解锁下游。插件只能验"文件在不在"，验不了"内容真不真"，
 	// 空心交付全靠这一关。设 false 回到老行为（finish 即 done）。
 	acceptGate: true,

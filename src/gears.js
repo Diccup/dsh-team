@@ -72,7 +72,7 @@ export function nextCtxTierK(currentK) {
  *  2026-10-31 设计确定：「不停压缩 2 次以上没产出，直接 +1 档上下文，别一直死循环」。
  *  压缩次数就是"这单实际要多大窗口"的硬证据，所以它抬起来的门槛 `ctxMin` 必须压过 size：
  *  派单/补员/换路由/撞顶重派全部按这个数筛路由 —— 否则 kill 掉成员后 autoFill 会再挑一条
- *  同样小的路由，把同一个死循环原样重开一遍（隔壁 8eaff90a 实测就是这么转圈烧 token 的）。 */
+ *  同样小的路由，把同一个死循环原样重开一遍（某次实测 实测就是这么转圈烧 token 的）。 */
 export function taskNeedCtx(task) {
 	const base = sizeCtxK(task === undefined || task === null ? undefined : task.size);
 	const raised = Number(task === undefined || task === null ? 0 : task.ctxMin);

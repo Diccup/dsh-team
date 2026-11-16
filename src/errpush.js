@@ -29,7 +29,7 @@
 //   所以跨队投递是**设计**，不是 bug。被删的只有「同一条错乱发给不该收的人」。
 //
 // 报错身份证（每条推送都带，需求方要的「带上队长+成员编号信息」）：
-//   成员 auto4「探针B」 · 队长 b87c7940 · t54 · cline/x/x@medium · 额度限流
+//   成员 auto4「探针B」 · 队长 <某队长> · t54 · cline/x/x@medium · 额度限流
 //   认不出来的人就写会话短号 + 路由，绝不写「?」糊过去。
 //
 // 和 index.js 的边界：本模块不 import 内核、不碰磁盘、不发通知（pushNotice 由调用方注入）。
@@ -110,7 +110,7 @@ export function whoAmI(sessionId, deps) {
  *
  * @param {object} fault
  * @param {Deps} deps
- * @returns {string} 形如 `auto4《探针B》· 队长 b87c7940 · t54 · cline/x@medium · 额度限流`
+ * @returns {string} 形如 `auto4《探针B》· 队长 <某队长> · t54 · cline/x@medium · 额度限流`
  */
 export function faultTag(fault, deps) {
 	const f = fault === undefined || fault === null ? {} : fault;

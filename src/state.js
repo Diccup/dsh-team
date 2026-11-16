@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------------
 
 export const members = new Map(); // childSessionId -> MemberRecord (live roster)
-// 2026-10-31 隔壁 b080dbbf 问题 8 的最后一道缝：成员被 recycle/kill-remove 之后从 members
+// 2026-10-31 某次实测 问题 8 的最后一道缝：成员被 recycle/kill-remove 之后从 members
 // 里消失了，但它的会话还在内核里活着 —— 这时它调 team，resolveLead 照样把它归到队长板上，
 // 而且 members.get(它) 是 undefined，被当成"队长"放行全套动作。
 // 所以除了"现在是不是在册成员"，还要记一份**曾经是成员的会话**，用来认领这种"退役成员"。

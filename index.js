@@ -159,7 +159,7 @@ export function apply(ctx, config = {}) {
 		scores.set(key, row);
 		trimScores();
 	}
-	/** 2026-10-31 打分表**消费端**（采纳隔壁 c197954c 建议，实现由实现方定）：
+	/** 2026-10-31 打分表**消费端**（采纳某次实测 建议，实现由实现方定）：
 	 *  把"战绩"从只记账变成**参与选路**。原则：
 	 *   - 只在**同类任务（kind）**内比较：code 强的模型不等于 probe 也强（隔壁实测
 	 *     nemotron-3.5-lightning-free 在 code 3/3、probe 0/3 —— 混着算就会两头都错）。
@@ -1150,7 +1150,7 @@ export function apply(ctx, config = {}) {
 		// tasks posted while all members slept: wake each lead's idle/cold member.
 		for (const [leadId, board] of boards) {
 			// 2026-10-30 自愈：板上已有「预指派给不存在成员」的脏单（历史 bug 留下的，
-			// 比如 owner=c290ae2e 那种会话短号）。新校验只能挡住新单，救不了旧单 ——
+			// 比如 owner=某次实测 那种会话短号）。新校验只能挡住新单，救不了旧单 ——
 			// 它会永远等一个不存在的人。这里每 tick 收一次：owner 不是本队成员名 → 清成可领。
 			// 顺带给队长一条 notice，不静默改数据。
 			for (const task of board.tasks.values()) {
@@ -1325,7 +1325,7 @@ export function apply(ctx, config = {}) {
 		walk(dir, 0);
 		return best;
 	}
-	/** 2026-10-31 验收门（评审采纳隔壁 c197654c 13:49:55 的建议，实现由实现方定）：
+	/** 2026-10-31 验收门（评审采纳某次实测 13:49:55 的建议，实现由实现方定）：
 	 *  问题：`finish` 之后任务直接 `done` + 立刻解锁下游。而插件**只能验"文件在不在"**
 	 *  （存在性 + mtime），验不了"内容真不真" —— 隔壁实测 t1/t8/t10 三次空心交付
 	 *  （json 全空字段）全部通过检查并解锁下游，每次连锁返工。
@@ -1339,7 +1339,7 @@ export function apply(ctx, config = {}) {
 		// acceptGate 关掉时 delivered 也只是个中间态，要当作已结（否则整板死锁）
 		|| (cfg.acceptGate === false && x.status === "delivered");
 
-	/** 状态流水（2026-10-31 隔壁 8eaff90a 实测：「t2 从 claimed 变 delivered，变化无日志/提示，
+	/** 状态流水（2026-10-31 某次实测 实测：「t2 从 claimed 变 delivered，变化无日志/提示，
 	 *  难定位原因」）。板子上原来只有一个当前状态：谁改的、什么时候、为什么，全都没有。
 	 *  验收门之后状态更多（open/claimed/delivered/done/failed），一条单向箭头根本还原不出
 	 *  中途被谁退回过、退回了几次。所以每处状态赋值前先记一笔，随任务一起落盘。
@@ -3111,9 +3111,9 @@ export function apply(ctx, config = {}) {
 			const out = await (async () => {
 				const caller = exec.agent;
 				if (caller === undefined) throw new Error("team requires a calling agent");
-				// 2026-10-31 隔壁 b080dbbf 实测（问题 6/8，最重）：成员 auto2 自己跑了
+				// 2026-10-31 某次实测 实测（问题 6/8，最重）：成员 auto2 自己跑了
 				// create/claim/set/save/adopt/disband 全套，把**队长的板**当场换血，还写了个
-				// team-ac737f37 存档。根因：resolveLead 沿 parentSession 往上爬，队员调 team
+				// team-<某队> 存档。根因：resolveLead 沿 parentSession 往上爬，队员调 team
 				// 拿到的正是队长板；而下面每个 case 只按 action 分派，从不问"调用方是不是队员"。
 				// 修法：队员态只放行「干活 / 回报 / 只读」这几件事，其余一律拒，并说明找谁办。
 				//
@@ -3295,7 +3295,7 @@ export function apply(ctx, config = {}) {
 						const openByLead = {};
 						for (const [lead, board] of boards) openByLead[lead] = Array.from(board.tasks.values()).filter((t) => t.status === "open").length;
 						const teamRows = all ? crossTeams(leadId) : undefined;
-						// 2026-10-31 隔壁 8eaff90a（问题 2）：状态怎么变的、谁改的，status 里要能看全。
+						// 2026-10-31 某次实测（问题 2）：状态怎么变的、谁改的，status 里要能看全。
 						// 只给最近 6 跳（够还原"被退回几次、谁退回的"），完整流水在 board.json 里。
 						const statusBoard = boards.get(leadId);
 						const trailRows = statusBoard === undefined ? [] : Array.from(statusBoard.tasks.values())
@@ -3367,7 +3367,7 @@ export function apply(ctx, config = {}) {
 							// 参数名 args 遮蔽外层的 args：body 里的写法与改前完全一致。
 							const createOne = (args, bc) => {
 								const preOwner = String(args.owner || "").trim();
-								// 2026-10-30 维护方抓到（隔壁 t8 owner="c290ae2e" 卡成 open 没人能干）：
+								// 2026-10-30 维护方抓到（隔壁 t8 owner="某次实测" 卡成 open 没人能干）：
 								// owner 以前沿用参考实现就收，于是队长把自己**会话短号/会话 id** 填进去也当成员名，
 								// 预指派指向一个不存在的人 → 成员按规矩不能抢（preassigned 只许 owner 领），
 								// 自动补员也不补（它能领但 owner 不是它）→ 这单永久卡死。
@@ -3384,7 +3384,7 @@ export function apply(ctx, config = {}) {
 								const demandRaw = checkDemand(args.demand);
 								const demand = demandRaw === "" ? String(DEMAND_DEFAULT) : demandRaw;
 								const kind = String(args.kind || "grunt").trim().toLowerCase() || "grunt";
-								// 2026-11-02 e2d599f2 压测：kind 拼错（比如 coder）以前被**静默接受**，
+								// 2026-11-02 某次实测 压测：kind 拼错（比如 coder）以前被**静默接受**，
 								// 派活时 KIND_HINT 查不到就落回 /.*/ —— 等于「按名字偏好选型」这层
 								// 整个失效，还看不出来。和 size 同口径：非法直接拒。
 								if (!TASK_KINDS.has(kind)) throw new Error(`kind 只能是 ${Array.from(TASK_KINDS).join("|")}（收到 ${kind}）。它决定选型时的名字偏好档，写错了不报错只会让派活悄悄变笨`);
@@ -3411,7 +3411,7 @@ export function apply(ctx, config = {}) {
 								}
 								board.seq += 1;
 								const tid = `t${board.seq}`;
-								// 2026-10-31 隔壁 8eaff90a（问题 4）：建单警告只提醒、没有"这单确实没有文件产物"
+								// 2026-10-31 某次实测（问题 4）：建单警告只提醒、没有"这单确实没有文件产物"
 								// 的正式说法，于是每次 finish 都要再被警告一遍，读起来像出错。
 								// 补一个显式免验声明 `no_artifact:true`：建单时就承认不落盘，finish 不再警告。
 								const declaredNoArt = args.no_artifact === true || String(args.no_artifact || "").trim().toLowerCase() === "true";
@@ -3523,7 +3523,7 @@ export function apply(ctx, config = {}) {
 						if (sub === "finish" || sub === "fail") {
 							const task = board.tasks.get(String(args.tid || ""));
 							if (!task) throw new Error(`unknown tid ${args.tid}（tid 形如 t1/t2；队目录名/文件名不是 tid）`);
-							// 2026-10-31 隔壁 b080dbbf 实测（问题 1，最伤）：队长对一张 open 且**没人认领**
+							// 2026-10-31 某次实测 实测（问题 1，最伤）：队长对一张 open 且**没人认领**
 							// 的单直接 finish，插件照样返回 delivered —— 等于"已交付"这两个字可以是假的：
 							// 没有成员干过活、没有产物、没有任何人声称完成，板上却写着待验收。
 							// 规矩：结单是"干这活的人说干完了"，所以只能由**当班的那个人**发起；
@@ -3580,7 +3580,7 @@ export function apply(ctx, config = {}) {
 							// 验收门（2026-10-31）：finish 不再直接 done，先转 delivered 等队长验收。
 							// 跳过验收的唯一情形是 `cfg.acceptGate === false`（老行为）。
 							// 状态流水：谁来交的、交成什么状态，一笔记下（「t2 从 claimed 变 delivered，
-							// 无日志」正是隔壁 8eaff90a 的问题 2 —— 现在 list/status 都能看见这一跳）。
+							// 无日志」正是某次实测 的问题 2 —— 现在 list/status 都能看见这一跳）。
 							const finTo = sub === "fail" ? "failed" : (cfg.acceptGate === false ? "done" : "delivered");
 							noteStatus(task, finTo, selfMember === undefined ? `${shortOf(leadId)}(队长)` : selfMember.name,
 								sub === "fail" ? (String(args.text || "").trim() === "" ? "fail（未给原因）" : "fail：" + String(args.text).trim().slice(0, 80)) : (cfg.acceptGate === false ? "finish（验收门关着，直接 done）" : "finish 交付，等队长验收"));
@@ -3603,7 +3603,7 @@ export function apply(ctx, config = {}) {
 								if (m.currentTask !== task.tid) continue;
 								m.currentTask = null;
 								// 交单这一刻持有者的路由 = 「这单的产出是谁做的」最准的凭据。
-								// score(tid) 反查路由就吃这条（2026-11-02 e2d599f2 建议 5）；
+								// score(tid) 反查路由就吃这条（2026-11-02 某次实测 建议 5）；
 								// 之后就算这人被 retool，档案里仍是干活时那条。
 								task.routeAtFinish = `${m.provider}/${m.model}`;
 								// 留一条"上单已结"的凭据：成员复活后会拿历史里的旧任务接着干，
@@ -3635,7 +3635,7 @@ export function apply(ctx, config = {}) {
 							}
 							// R4: code/probe 类不声明 artifacts 就结单 —— 不硬拦（有些活儿确实没有文件
 							// 产物），但必须留声：虚报三连（t4/t9/t12）全是"无声明单"，无声放行等于没测。
-							// 2026-10-31 隔壁 8eaff90a（问题 4）：建单时已经用 no_artifact:true 认下来的单，
+							// 2026-10-31 某次实测（问题 4）：建单时已经用 no_artifact:true 认下来的单，
 							// 这里不再警告 —— 否则"已声明免验"和"忘了写 artifacts"收到同一句话，
 							// 每次交付都像出错。只在 lastReport 留一行痕，验收时看得到。
 							const noArt = !Array.isArray(task.artifacts) || task.artifacts.length === 0;
@@ -3721,7 +3721,7 @@ export function apply(ctx, config = {}) {
 										const ph = raw.filter((x) => ART_PH.test(x));
 										applied.push(`artifacts=${task.artifacts.length}${ph.length > 0 ? `（忽略占位词 ${ph.join("、")}）` : ""}`);
 									}
-									// 2026-10-31 隔壁 8eaff90a（问题 4）：把"这单确实没有文件产物"变成板上的一等字段。
+									// 2026-10-31 某次实测（问题 4）：把"这单确实没有文件产物"变成板上的一等字段。
 									// 只认 true；给 false / 别的值就是解除免验（重新按需要产物处理）。
 									if (args.no_artifact !== undefined && args.no_artifact !== null && String(args.no_artifact).trim() !== "") {
 										const v = args.no_artifact === true || String(args.no_artifact).trim().toLowerCase() === "true";
@@ -3768,7 +3768,7 @@ export function apply(ctx, config = {}) {
 												task.owner = o; task.preassigned = true; applied.push(`owner=${o}`);
 											}
 										}
-										// 2026-11-02 e2d599f2 压测：工具描述一直承诺「set 能改 blocked_by，
+										// 2026-11-02 某次实测 压测：工具描述一直承诺「set 能改 blocked_by，
 										// ""=清依赖」，实现里却根本没消费这个字段 —— 单独 set blocked_by
 										// 会掉进「没改成任何东西」的报错，等于只能创建时设。补上，口径与建单一致：
 										// 依赖必须是板上真实存在的 tid、不许自依赖、不许成环（A←B←A）。
@@ -3799,7 +3799,7 @@ export function apply(ctx, config = {}) {
 											}
 										}
 									}
-									// 2026-10-31 隔壁 b080dbbf 实测（问题 3）：set 一个字都不改也会回
+									// 2026-10-31 某次实测 实测（问题 3）：set 一个字都不改也会回
 									// "reopened (rev N)" —— 空 set 有隐式重开副作用。规矩：没改任何字段就是没改。
 									if (applied.length === 0) {
 										throw new Error(`${task.tid} 没改成任何东西 —— set 至少要给一个字段（title/body/brief_path/artifacts/no_artifact/prio/caps/kind/size/demand/owner/blocked_by）。它当前：${task.tid}|${task.status}|${task.owner || "-"}|${task.kind}/${task.size}｜要重开用 action2:"reopen"`);
@@ -3822,7 +3822,7 @@ export function apply(ctx, config = {}) {
 								...(setSkipped.length > 0 ? { skipped: setSkipped } : {}),
 							}, leadId);
 						}
-						// 2026-10-31 隔壁 b080dbbf 实测（问题 2）：action2 写 "reopen" 直接落到函数末尾的
+						// 2026-10-31 某次实测 实测（问题 2）：action2 写 "reopen" 直接落到函数末尾的
 						// list 分支 —— 返回值是整张任务列表，失败单/已交单的状态一个都没动，看起来"reopen 无效"。
 						// 现在它是真动作：把 failed/delivered/done 的单退回 open 重干，并清掉残留状态。
 						if (sub === "reopen") {
@@ -3936,7 +3936,7 @@ export function apply(ctx, config = {}) {
 							tasks: Array.from(board.tasks.values()).map((t) => {
 								const rej = (t.rejections || []).length;
 								const tail = `${t.status === "failed" && t.error !== undefined ? `|错误:${String(t.error).slice(0, 120)}` : ""}${rej > 0 ? `|拒收${rej}次` : ""}${Array.isArray(t.artifacts) && t.artifacts.length > 0 ? `|产物${t.artifacts.length}` : ""}`;
-								// 2026-10-31 隔壁 8eaff90a（问题 2）：光给当前状态，看不出"谁把它从 claimed
+								// 2026-10-31 某次实测（问题 2）：光给当前状态，看不出"谁把它从 claimed
 								// 改成 delivered、什么时候改的"。行尾补最近一跳，中间被退回几次也能看出来。
 								return `${t.tid}|${t.status}|${t.owner || "-"}|p${t.prio}|d${demandRank(t.demand)}|${t.kind || "grunt"}/${t.size || "m"}${t.blockedBy && t.blockedBy.length > 0 ? "|←" + t.blockedBy.join(",") : ""}|${t.title}${tail}${trailLine(t)}`;
 							}),
@@ -3964,7 +3964,7 @@ export function apply(ctx, config = {}) {
 						}
 						// self-claim when the caller is a member; explicit `to` otherwise
 						//
-						// 2026-10-31 隔壁 8eaff90a 实测（问题 1/2，靶上 t3）：用 `to:"实现方-claimer"`
+						// 2026-10-31 某次实测 实测（问题 1/2，靶上 t3）：用 `to:"实现方-claimer"`
 						// 认领，插件照收 —— 因为 findMember 找不到这个名字时 member 是 undefined，
 						// 然后 `task.owner = String(args.to || "manual")` 把**一个不存在的人**写进
 						// owner。后果是这条单从此挂在幽灵名下：名册里没人认它，自动派单不会给它，
@@ -4045,7 +4045,7 @@ export function apply(ctx, config = {}) {
 						}
 						if (!provider || !model) throw new Error("retool needs provider+model（或 provider:\"auto\" 交回插件轮换）");
 						if (leadRouteKeys().has(provider + "/" + model)) throw new Error(`${provider}/${model} 是队长路由（一律不派给成员）— 换一个`);
-						// 2026-11-02 e2d599f2 压测（6.3）：retool 沿用参考实现任何字符串都收，装上去
+						// 2026-11-02 某次实测 压测（6.3）：retool 沿用参考实现任何字符串都收，装上去
 						// 成员下一步才报 "no adapter registered"，整单退回 open 白烧一轮。
 						// 台账里从没见过这条路由 = 网关侧多半不存在 —— 当场拒，除非 force。
 						if (!ledger.has(`${provider}/${model}`) && args.force !== true && String(args.force) !== "true") {
@@ -4210,7 +4210,7 @@ export function apply(ctx, config = {}) {
 						const me = resolveLead(caller);
 						// 自己 = 本会话（按原始会话 id 比），不是 resolveLead 之后的"我所属的队长"。
 						if (hits[0] === meRaw) throw new Error("to 是自己 —— 填对方会话的短号");
-						// 2026-10-31 维护方报的真事故（c197654c → b87c7940 的报告没被叫醒）根因就是下面这条：
+						// 2026-10-31 维护方报的真事故（某次实测 → 某次实测 的报告没被叫醒）根因就是下面这条：
 						// `tell` 明明把收信人写在一等公民字段 `to` 里，代码却去**正文**里找 @。
 						// 正文没 @（或 @ 落在 800 字截断点之后）= 永远不叫醒 → 报告躺在信箱里等人自己想起来。
 						// 改法：收信人由 `to` 决定，**信里写了 to 就算指名**（addressed 默认 true），
@@ -4326,7 +4326,7 @@ export function apply(ctx, config = {}) {
 							// errorRules 是从 errbook 解构来的 const 绑定，且 errbook 的
 							// saveErrorRules/matchErrorRule 闭包盯的是同一个数组对象 ——
 							// 只能原地 splice，重新赋值既违法（Assignment to constant
-							// variable，e2d599f2 报告 3.1 的根因）又会把闭包里那份旧数组留下。
+							// variable，某次实测 报告 3.1 的根因）又会把闭包里那份旧数组留下。
 							const idx = errorRules.findIndex((r) => r.id === id);
 							if (idx === -1) throw new Error(`没有这条登记规则：${id}（内置规则不能删）`);
 							errorRules.splice(idx, 1);
@@ -4590,7 +4590,7 @@ export function apply(ctx, config = {}) {
 						if (!Number.isFinite(v) || v < 1 || v > 5) throw new Error(`score 要给 1~5 的数字（3=合格，低于 3 扣分、高于 3 加分），收到「${rawScore}」`);
 						let sp = String(args.provider || "").trim();
 						let sm = String(args.model || "").trim();
-						// 2026-11-02 e2d599f2 压测（建议 5）：队长手里最自然的信息是「这一单」，
+						// 2026-11-02 某次实测 压测（建议 5）：队长手里最自然的信息是「这一单」，
 						// 路由是次要的。给了 tid 就自动反查：干这单的人（现任 owner 或
 						// 交付时记录的持有路由）是谁、走哪条路由。查得到就不用再写 provider/model。
 						const scoreTid = String(args.tid || "").trim();
@@ -5427,7 +5427,7 @@ export function apply(ctx, config = {}) {
 	 *  为什么必须由插件做、而不是推给队长：
 	 *  - 队长看到提醒再去 retool，中间又烧掉几轮；跨会话那两句话根本来不及。
 	 *  - kill 掉成员也没用 —— 单退回 open 后补员又按 `size` 挑一条同样小的路由，
-	 *    把同一个死循环原样重开（隔壁 8eaff90a 实测：kill 完立刻又被派回去）。
+	 *    把同一个死循环原样重开（某次实测 实测：kill 完立刻又被派回去）。
 	 *  所以这里做两件事：① 把 `task.ctxMin` 抬到下一档并**落盘**（之后派单/补员/换路由
 	 *  全部按它筛，小路由再也接不到这单）；② 原地把当前成员换到够大的路由，下一步生效，
 	 *  不用重派。抬到顶档（MAX_TIERS）仍被压缩，才说明池子里没有能装下这单的窗口 —— 那时
