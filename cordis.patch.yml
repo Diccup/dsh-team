@@ -1,0 +1,32 @@
+# dsh-team bundle patch（发布版）
+#
+# ★★ 装插件的正规两条，都在 profile 的 package.json 里 ★★
+#   光把文件夹拷进 ~\.dsh\plugins\ 再重启，DSH **不认** —— 它不扫那个目录。
+#   要在**你自己的 profile 目录**（~\.dsh\profiles\<你的profile名>\package.json）里补两处：
+#     1) "dependencies" 加一行：
+#          "dsh-team": "link:C:/Users/<你的用户名>/.dsh/plugins/dsh-team"
+#        加完在该目录跑 pnpm install。
+#     2) "dsh.profile.bundles" 数组末尾补 "dsh-team"
+#   两处少一处都不加载。**不需要**往 profile 的 cordis.patch.yml 里写 insert 块 ——
+#   本文件就是插件进组合树的通道，profile 再 insert 一次 = 双份注册。
+#   想改配置：在 profile 的 cordis.patch.yml 里加 "- id: dsh-team" + "config:" 的**覆盖块**，或直接改本文件。
+#   改完注册或配置都要**完全退出 DSH 重开**（内核只在启动时组合这棵树）。
+#   逐步说明见 INSTALL.md 第 2 节。
+#
+# 配置口子里最常被改的两个：
+#   · workspaceRoot —— 成员的写根边界，建议改成你自己的工程目录，
+#     不改就落在 .dsh 根下（能跑，但成员写文件全在 .dsh 里）
+#   · stateDir —— **可以不管**。发布版 src/config.js 的默认值已改成
+#     <插件目录>\.state，跟着安装走；只有想把数据放别处才取消注释。
+- insert:
+    - id: dsh-team
+      name: dsh-team
+      config:
+        renderLedger: true
+        # workspaceRoot: 'C:\\work'
+        # stateDir: 'C:\\Users\\<你的用户名>\\.dsh\\plugins\\dsh-team\\.state'
+        # 下面两项都可省，省略就落在 .dsh 根下（team 目录 / 历史 md）
+        # teamDir: 'C:\\Users\\<你的用户名>\\.dsh\\team'
+        # ledgerHistoryPath: 'C:\\Users\\<你的用户名>\\.dsh\\team\\ledger-history.md'
+        # profile 名很特别、插件探测猜错时才需要钉：
+        # whitelistPatchPath: 'C:\\Users\\<你的用户名>\\.dsh\\profiles\\<你的profile>\\cordis.patch.yml'

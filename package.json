@@ -1,0 +1,57 @@
+{
+  "name": "dsh-team",
+  "version": "1.0.0",
+  "description": "Local agent-team runtime for DSH: one team tool, live member routes, idle auto-claim, and a self-maintaining free-model ledger, with a zero-context right-sidebar panel.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "skills",
+    "setup",
+    "member-badge.md",
+    "INSTALL.md",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "agent",
+    "team",
+    "multi-agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Diccup/dsh-team.git"
+  },
+  "homepage": "https://github.com/Diccup/dsh-team#readme",
+  "bugs": {
+    "url": "https://github.com/Diccup/dsh-team/issues"
+  },
+  "engines": {
+    "node": "^22.19 || >=24"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  }
+}

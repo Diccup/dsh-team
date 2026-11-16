@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Syntax-check plugin entry
+        shell: pwsh
+        run: |
+          node --check index.js
+          node --check client.js
+          Get-ChildItem -Recurse -Path src -Filter *.js | ForEach-Object { node --check $_.FullName }
+
+      - name: Run self-test / acceptance gate
+        shell: pwsh
+        run: |
+          node --input-type=module -e "import('./src/config.js').then(m => { console.log('stateDir =', m.STATE_DIR_DEFAULT); })"
+
+      - name: Guard — no hardcoded developer-machine absolute paths
+        shell: pwsh
+        run: |
+          # 判据：只查**会执行的、指向开发机自己的**绝对路径字面量。
+          #   · 注释里提一嘴 F:\workspace 是历史说明，不会被执行 → 放行
+          #   · 测试夹具里的假路径（'C:\w'、'F:\x.txt'）是测试数据 → 放行
+          #   · 引号里包着的 F:\workspace... / C:\Users\Diccup... → 别人机器上没有 → 违规
+          $pattern = "['`"][A-Za-z]:\\\\+[^'`"]+['`"]"
+          # 开发机专属路径：LongMem 工作区 + 实现方的用户名
+          $devbox = 'F:\\\\workspace\\\\LongMem|C:\\\\Users\\\\Diccup'
+          $hits = Get-ChildItem -Recurse -Include *.js,*.mjs,*.py,*.ps1,*.json,*.yml -File |
+            Where-Object { $_.FullName -notmatch '\\.git\\' -and $_.FullName -notmatch '\\deps\\pylibs\\' } |
+            Select-String -Pattern $pattern -AllMatches |
+            Where-Object { $_.Line -match $devbox -and $_.Line -notmatch '^\s*(//|#|\*|<!--)' }
+          if ($hits) {
+            $hits | ForEach-Object { Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())" }
+            Write-Host 'FAIL: hardcoded developer-machine path found'
+            exit 1
+          }
+          Write-Host 'OK: no developer-machine absolute path'

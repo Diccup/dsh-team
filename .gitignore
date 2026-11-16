@@ -1,0 +1,48 @@
+# 通用忽略规则（DSH 插件发布版）
+
+# 依赖与构建产物
+node_modules/
+*.tgz
+*.tar.gz
+pnpm-lock.yaml
+package-lock.json
+
+# 运行时数据（不该进仓库）
+.content/
+engine/.content/
+*.db
+*.db-wal
+*.db-shm
+.state/
+.state.cold-*/
+backups/
+*.bak-*
+out/
+diag/
+tmp/
+.temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+
+# 探针与日志
+*.log
+.cdp-last-err.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 环境与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
